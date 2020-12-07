@@ -32,16 +32,56 @@ class Frac:
 
     # Python 2.7 i Python 3
     def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
+        if isinstance(other, int):
+            x = other * self.y
+            y = self.y
+            return self.x == x and self.y == y
+
+        if isinstance(other, float):
+            x, y = other.as_integer_ratio()
+            return self.x == x and self.y == y
+
+        if isinstance(other, Frac):
+            return self.x == other.x and self.y == other.y
 
     def __ne__(self, other):
-        return self.x != other.x
+        if isinstance(other, int):
+            x = other * self.y
+            y = self.y
+            return self.x != x
+
+        if isinstance(other, float):
+            x, y = other.as_integer_ratio()
+            return self.x != x and self.y != y
+
+        if isinstance(other, Frac):
+            return self.x != other.x and self.y != other.y
 
     def __lt__(self, other):
-        return float(self) < float(other)
+        if isinstance(other, int):
+            x = other * self.y
+            return self.x < x
+
+        if isinstance(other, float):
+            x, y = other.as_integer_ratio()
+            new_other = Frac(x, y)
+            return float(self) < float(new_other)
+
+        if isinstance(other, Frac):
+            return float(self) < float(other)
 
     def __le__(self, other):
-        return float(self) <= float(other)
+        if isinstance(other, int):
+            x = other * self.y
+            return self.x <= x
+
+        if isinstance(other, float):
+            x, y = other.as_integer_ratio()
+            new_other = Frac(x, y)
+            return float(self) <= float(new_other)
+
+        if isinstance(other, Frac):
+            return float(self) <= float(other)
 
     #def __gt__(self, other): pass
 
@@ -137,12 +177,7 @@ class Frac:
 
     def __invert__(self):
         """odwrotnosc: ~frac"""
-        if self < 0:
-            #Odwracam ułamek ale - zostaje w liczniku
-            self.x, self.y = -1 * self.y, -1 *self.x
-            return self
-        else:
-            return Frac(self.y, self.x)
+        return Frac(self.y, self.x)
 
     def __float__(self):
         """float(frac)"""
@@ -241,10 +276,20 @@ class TestFrac(unittest.TestCase):
         # Trzeba sprawdzać ==, !=, >, >=, <, <=.
         self.assertTrue(Frac(1, 1) == Frac(1, 1))
         self.assertFalse(Frac(1, 10) == Frac(0, 1))
+        self.assertFalse(Frac(1, 10) == 6)
+        self.assertTrue(Frac(10, 10) == 1)
+        self.assertFalse(Frac(1, 6) == 1.5)
+        self.assertTrue(Frac(1, 2) == 0.5)
         self.assertTrue(Frac(2, 3) != Frac(3, 2))
         self.assertFalse(Frac(1, 2) != Frac(1, 2))
         self.assertTrue(Frac(3, 5) < Frac(4, 5))
         self.assertFalse(Frac(8, 9) < Frac(7, 9))
+        self.assertFalse(Frac(8, 9) <= 0.1)
+        self.assertTrue(Frac(1, 2) < 5)
+        self.assertTrue(Frac(1, 2) < 5.8)
+        self.assertTrue(5.8 > Frac(1, 2))
+        self.assertTrue(5.8 >= Frac(1, 2))
+        self.assertTrue(6 >= Frac(1, 2))
         self.assertTrue(Frac(2, 4) <= Frac(3, 4))
         self.assertTrue(Frac(2, 5) <= Frac(2, 5))
         self.assertFalse(Frac(4, 6) <= Frac(3, 6))
@@ -266,7 +311,7 @@ class TestFrac(unittest.TestCase):
 
     def test_invert(self):
         self.assertEqual(~(Frac(2, 5)), Frac(5, 2))
-        self.assertEqual(~(Frac(-2, 3)), Frac(-3, 2))
+        self.assertEqual(~(Frac(-2, 3)), Frac(3, -2))
 
     def test_float(self):
         self.assertEqual(float(Frac(1, 2)), 0.5)
