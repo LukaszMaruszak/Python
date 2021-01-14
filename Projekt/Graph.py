@@ -1,11 +1,11 @@
+
 def swap(L, left, right):
     """Zamiana miejscami dwóch elementów na liście."""
     L[left], L[right] = L[right], L[left]
 
 
 class Edge:
-    """Klasa dla krawędzi skierowanej z wagą."""
-
+    """Klasa dla krawędzi z wagą."""
     def __init__(self, source, target, weight=1):
         """Konstruktor krawędzi."""
         self.source = source
@@ -23,8 +23,12 @@ class Edge:
 
 class Graph:
     def __init__(self):
-        """Konstruktor krawędzi."""
+        """Konstruktor Grafu. Słownikowa reprezentacja grafu"""
         self.graph = {}
+
+        # zmienne wykorzystywane w algorytmie Kruskala
+        self.parent = {}
+        self.rank = {}
 
     def add_node(self, node):
         """Wstawia wierzchołek do grafu."""
@@ -63,7 +67,7 @@ class Graph:
         return len(self.list_nodes())
 
     def print_graph(self):
-        """Wypisuje postać grafu skierowanego ważonego na ekranie."""
+        """Wypisuje postać grafu nieskierowanego ważonego na ekranie."""
         L = []
         for source in self.graph:
             L.append("{} : ".format(source))
@@ -73,6 +77,7 @@ class Graph:
         print("".join(L))
 
     def sort_edges(self):
+        """Sortowanie krawędzi na podstawie ich wagi"""
         L = self.list_edges()
         for i in range(0, len(L) - 1):
             for j in range(0, len(L) - 1):
@@ -80,31 +85,45 @@ class Graph:
                     swap(L, j + 1, j)
         return L
 
+    def FindParent(self, node):
+        """Znajdz Rodzica wierzchołka w grafie"""
+        if self.parent[node] == node:
+            return node
+        return self.FindParent(self.parent[node])
+
     def Kruskal_Algorithm(self):
+        # mst -  minimum spanning tree
         mst = Graph()
         L = self.sort_edges()
+
+        # inicjaliacja słownika zawierającego rodzica każdego węzła
+        for n in self.list_nodes():
+            # każdy węzeł jest rodzicem dla samego siebie
+            self.parent[n] = n
+            # każdy węzeł nie jest połączony z innym węzłem
+            self.rank[n] = 0
+
+        # przechodę po posortowanej rosnąco liście krawędzi zaczynając od pierwszej
         for j in range(0, len(L)):
             i = L.pop(0)
-            # print("Min krawędż" + str(i))
+            # i = Edge(start, koniec, waga)
+            start = i[0]
+            koniec = i[1]
+            waga = i[2]
+            rodzic1 = self.FindParent(start)
+            rodzic2 = self.FindParent(koniec)
             # Sprawdzam czy do drzewa rozpinającego dodałem wszystkie krawędzie z grafu
 
-            if i[0] not in mst.list_nodes() or i[1] not in mst.list_nodes():
-                # print("Not in mst")
-                mst.add_edge_undirected(Edge(i[0], i[1], i[2]))
-                # print(mst.list_nodes())
-                # print("in mst")
-            # print("mst size " + str(mst.graph_size() ))
-            if mst.graph_size() == self.graph_size():
-                return mst
-
-
-
-g = Graph()
-g.add_edge_undirected(Edge("A", "B", 1))
-g.add_edge_undirected(Edge("A", "C", 2))
-g.add_edge_undirected(Edge("B", "C", 3))
-g.add_edge_undirected(Edge("C", "D", 5))
-g.add_edge_undirected(Edge("D", "B", 4))
-g.add_edge_undirected(Edge("E", "C", 7))
-g.add_edge_undirected(Edge("F", "A", 5))
-g.Kruskal_Algorithm().print_graph()
+            # kiedy rodzice węzła początkowego i końcowego krawędzi są w inny zbiorze
+            # dodaje do mst
+            if rodzic1 != rodzic2:
+                mst.add_edge_undirected(Edge(start, koniec, waga))
+                # łączę dwa zbiory do większego dodaje mniejszy
+                # dodanie zbiorów to aktualizacja rodzica w słowniku parent
+                if self.rank[rodzic1] < self.rank[rodzic2]:
+                    self.parent[rodzic1] = rodzic2
+                    self.rank[rodzic2] += 1
+                else:
+                    self.parent[rodzic2] = rodzic1
+                    self.rank[rodzic1] += 1
+        return mst
