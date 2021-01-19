@@ -20,6 +20,7 @@ def plot_Graph(graph):
     plt.title("Graf odczytany z pliku")
     plt.show()
 
+
 def plot_Mst(graph, mst):
     G = nx.Graph()
     for edge in graph.list_edges():

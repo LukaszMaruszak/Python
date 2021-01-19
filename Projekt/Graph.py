@@ -1,9 +1,3 @@
-
-def swap(L, left, right):
-    """Zamiana miejscami dwóch elementów na liście."""
-    L[left], L[right] = L[right], L[left]
-
-
 class Edge:
     """Klasa dla krawędzi z wagą."""
     def __init__(self, source, target, weight=1):
@@ -38,8 +32,8 @@ class Graph:
     def add_edge_undirected(self, edge):
         """Dodaje krawędź do grafu nieskierowanego."""
         source = edge.source
-        weight = edge.weight
         target = edge.target
+        weight = edge.weight
 
         self.add_node(source)
         self.add_node(target)
@@ -79,19 +73,18 @@ class Graph:
     def sort_edges(self):
         """Sortowanie krawędzi na podstawie ich wagi"""
         L = self.list_edges()
-        for i in range(0, len(L) - 1):
-            for j in range(0, len(L) - 1):
-                if L[j][2] > L[j + 1][2]:
-                    swap(L, j + 1, j)
+        # sortowanie listy krotek względem 2 pozycji, ktora jest wagą
+        # List jest sortowana od największej do najmiejszej długośći krawędzi
+        L.sort(key=lambda krawedz: krawedz[2])
         return L
 
-    def FindParent(self, node):
+    def find_node_parent(self, node):
         """Znajdz Rodzica wierzchołka w grafie"""
         if self.parent[node] == node:
             return node
-        return self.FindParent(self.parent[node])
+        return self.find_node_parent(self.parent[node])
 
-    def Kruskal_Algorithm(self):
+    def kruskal_algorithm(self):
         # mst -  minimum spanning tree
         mst = Graph()
         L = self.sort_edges()
@@ -104,20 +97,15 @@ class Graph:
             self.rank[n] = 0
 
         # przechodę po posortowanej rosnąco liście krawędzi zaczynając od pierwszej
-        for j in range(0, len(L)):
-            i = L.pop(0)
-            # i = Edge(start, koniec, waga)
-            start = i[0]
-            koniec = i[1]
-            waga = i[2]
-            rodzic1 = self.FindParent(start)
-            rodzic2 = self.FindParent(koniec)
-            # Sprawdzam czy do drzewa rozpinającego dodałem wszystkie krawędzie z grafu
+        for (source, target, weight) in L:
+            # Szukam rodziców wierzchołków należących do krawędzi
+            rodzic1 = self.find_node_parent(source)
+            rodzic2 = self.find_node_parent(target)
 
-            # kiedy rodzice węzła początkowego i końcowego krawędzi są w inny zbiorze
+            # kiedy rodzice wierzchołka początkowego i końcowego krawędzi są w inny zbiorze
             # dodaje do mst
             if rodzic1 != rodzic2:
-                mst.add_edge_undirected(Edge(start, koniec, waga))
+                mst.add_edge_undirected(Edge(source, target, weight))
                 # łączę dwa zbiory do większego dodaje mniejszy
                 # dodanie zbiorów to aktualizacja rodzica w słowniku parent
                 if self.rank[rodzic1] < self.rank[rodzic2]:

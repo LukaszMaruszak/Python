@@ -15,7 +15,7 @@ def load_file(file_name = 'grafy/graf.txt'):
 
 if __name__ == '__main__':
     graf = load_file("grafy/graf1.txt")
-    mst = graf.Kruskal_Algorithm()
+    mst = graf.kruskal_algorithm()
 
     # wypisanie odczytanego grafu w konsoli
     graf.print_graph()
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     plot_Mst(graf, mst)
 
     graf = load_file()
-    mst = graf.Kruskal_Algorithm()
+    mst = graf.kruskal_algorithm()
 
     # wypisanie odczytanego grafu w konsoli
     graf.print_graph()
